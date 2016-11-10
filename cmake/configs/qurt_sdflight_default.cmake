@@ -60,7 +60,8 @@ set(config_module_list
 	# PX4 drivers
 	#
 	drivers/gps
-	drivers/pwm_out_rc_in
+	Gromit/pwm_out_rc_in
+	Gromit/QURT_fk_bridge
 	drivers/qshell/qurt
 
 	#

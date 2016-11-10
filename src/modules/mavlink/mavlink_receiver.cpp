@@ -347,7 +347,49 @@ MavlinkReceiver::handle_message_command_long(mavlink_message_t *msg)
 	mavlink_command_long_t cmd_mavlink;
 	mavlink_msg_command_long_decode(msg, &cmd_mavlink);
 
+  struct vehicle_command_s vcmd;
+
+  memset(&vcmd, 0, sizeof(vcmd));
+
+  /* Copy the content of mavlink_command_long_t cmd_mavlink into command_t cmd */
+  vcmd.param1 = cmd_mavlink.param1;
+
+  vcmd.param2 = cmd_mavlink.param2;
+
+  vcmd.param3 = cmd_mavlink.param3;
+
+  vcmd.param4 = cmd_mavlink.param4;
+
+  vcmd.param5 = cmd_mavlink.param5;
+
+  vcmd.param6 = cmd_mavlink.param6;
+
+  vcmd.param7 = cmd_mavlink.param7;
+
+  // XXX do proper translation
+  vcmd.command = cmd_mavlink.command;
+
+  vcmd.target_system = cmd_mavlink.target_system;
+
+  vcmd.target_component = cmd_mavlink.target_component;
+
+  vcmd.source_system = msg->sysid;
+
+  vcmd.source_component = msg->compid;
+
+  vcmd.confirmation =  cmd_mavlink.confirmation;
+
+  if (_cmd_pub == nullptr) {
+    _cmd_pub = orb_advertise(ORB_ID(vehicle_command), &vcmd);
+
+  } else {
+    orb_publish(ORB_ID(vehicle_command), _cmd_pub, &vcmd);
+  }
+
+	return;
+
 	bool target_ok = evaluate_target_ok(cmd_mavlink.command, cmd_mavlink.target_system, cmd_mavlink.target_component);
+
 
 	if (target_ok) {
 		//check for MAVLINK terminate command
@@ -381,7 +423,7 @@ MavlinkReceiver::handle_message_command_long(mavlink_message_t *msg)
 				return;
 			}
 
-			struct vehicle_command_s vcmd;
+			//struct vehicle_command_s vcmd;
 
 			memset(&vcmd, 0, sizeof(vcmd));
 
@@ -2174,8 +2216,8 @@ MavlinkReceiver::receive_thread(void *arg)
 			if (_mavlink->get_client_source_initialized()) {
 				/* if read failed, this loop won't execute */
 				for (ssize_t i = 0; i < nread; i++) {
-					if (mavlink_parse_char(_mavlink->get_channel(), buf[i], &msg, &status)) {
 
+					if (mavlink_parse_char(_mavlink->get_channel(), buf[i], &msg, &status)) {
 						/* check if we received version 2 */
 						// XXX todo _mavlink->set_proto_version(2);
 
