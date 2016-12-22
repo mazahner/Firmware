@@ -319,6 +319,18 @@ function(px4_nuttx_add_romfs)
 
 	set(cmake_test ${PX4_SOURCE_DIR}/cmake/test/cmake_tester.py)
 
+	# Copy the optional files into ROMFS
+	set(optional_files)
+	foreach(optional_file ${romfs_optional_files})
+		get_filename_component(file_name ${optional_file} NAME)
+		set(file_dest ${extras_dir}/${file_name})
+		add_custom_command(OUTPUT ${file_dest}
+			COMMAND cmake -E copy ${optional_file} ${file_dest}
+			DEPENDS ${optional_file}
+			)
+		list(APPEND optional_files ${file_dest})
+	endforeach()
+	add_custom_target(collect_optional_extras DEPENDS ${optional_files})
 	
 	set(extras)
 	foreach(extra ${EXTRAS})
@@ -352,7 +364,7 @@ function(px4_nuttx_add_romfs)
 			--obj romfs.o
 			--var romfs_img
 			--bin romfs.bin
-		DEPENDS ${romfs_src_files} ${extras}
+		DEPENDS ${romfs_src_files} ${extras} ${optional_files}
 		WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
 		)
 	add_library(${OUT} STATIC romfs.o)
