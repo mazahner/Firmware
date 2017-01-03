@@ -47,7 +47,12 @@ set(config_module_list
 	modules/position_estimator_inav
 	modules/local_position_estimator
 	modules/ekf2
-
+    
+    #
+    # Gromit Modules
+    #
+    Gromit/qurt_fk_bridge
+    
 	#
 	# Vehicle Control
 	#
